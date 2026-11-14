@@ -1,6 +1,6 @@
 member,git_author_name,git_email,role,modules_files,commit_shas,evidence_note,presenter
-Member 1,,,Lead / Integrator,src/main.py; configs/,,,
-Member 2,,,Data & fixtures,fixtures/; tools/,,,
-Member 3,,,Core algorithm,src/pipeline.py,,,
-Member 4,,,QA / metric,tests/; reports/metrics_*.json,,,
-Member 5,,,Human review + report,reports/group_report.md; demo/,,,
+IND-03065 (Dang Hoang Gia),dieu-cay-15,danggia2412@gmail.com,Individual Owner · Config & Policy Contract,configs/lab.yaml; configs/policies/t09_policy.yaml; reports/metric_contract.md,7ceb4e9,"Locked T09 params, 24 source-cited rules (VN/EU/US-CA/SG/IN future effective_date), and metric contract before eval",Yes
+IND-03065 (Dang Hoang Gia),dieu-cay-15,danggia2412@gmail.com,Individual Owner · Baselines (consent_naive + all_hold),src/baseline.py,18e653e,"Implemented naive consent_naive and trivial all_hold baselines on fixed seed=42 and same candidate pool",Yes
+IND-03065 (Dang Hoang Gia),dieu-cay-15,danggia2412@gmail.com,Individual Owner · Core Policy Engine & 5-Step Pipeline,src/policy_engine.py; src/pipeline.py,b0ba5c0,"Implemented AST safe condition evaluator, active-vs-advisory effective_date split, HITL review overrides, audit log, and release gate",Yes
+IND-03065 (Dang Hoang Gia),dieu-cay-15,danggia2412@gmail.com,Individual Owner · QA Metrics & Unit/HITL Tests,tests/test_pipeline.py,b26389b,"Added 7 tests covering determinism, baselines, HITL overrides, missing reviewer fail-fast, strict provenance, and dev self-eval",Yes
+IND-03065 (Dang Hoang Gia),dieu-cay-15,danggia2412@gmail.com,Individual Owner · HITL Review · Demo Charts & Report,demo/*.png; reports/review_queue.csv; reports/decision_log.csv; reports/group_report.md,69ded3b,"Executed 7-item DPO review queue, verified audit_log.jsonl diffs, generated dev charts, and authored final report (tag final-24h)",Yes
