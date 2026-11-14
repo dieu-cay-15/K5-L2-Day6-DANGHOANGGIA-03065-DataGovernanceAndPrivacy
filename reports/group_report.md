@@ -185,11 +185,11 @@ pytest -q
 
 | Học viên | Git author / email | Module / vai trò | Commit SHA chứng minh | Trình bày? |
 |---|---|---|---|---|
-| **Dang Hoang Gia** (`IND-03065`) | `dieu-cay-15 <danggia2412@gmail.com>` | Config, Policy YAML `v1.0.0` & Metric Contract (`configs/`, `reports/metric_contract.md`) | `7ceb4e9` | Có (cá nhân) |
-| **Dang Hoang Gia** (`IND-03065`) | `dieu-cay-15 <danggia2412@gmail.com>` | Baseline `consent_naive` & `all_hold` (`src/baseline.py`) | `18e653e` | Có (cá nhân) |
-| **Dang Hoang Gia** (`IND-03065`) | `dieu-cay-15 <danggia2412@gmail.com>` | AST Policy Engine & 5-step Gate + HITL (`src/policy_engine.py`, `src/pipeline.py`) | `b0ba5c0` | Có (cá nhân) |
-| **Dang Hoang Gia** (`IND-03065`) | `dieu-cay-15 <danggia2412@gmail.com>` | 7 Tests: Determinism, HITL, Provenance, `effective_date`, Dev Self-eval (`tests/test_pipeline.py`) | `b26389b` | Có (cá nhân) |
-| **Dang Hoang Gia** (`IND-03065`) | `dieu-cay-15 <danggia2412@gmail.com>` | DPO Review Queue, Charts, Audit Evidence & Final Report (`demo/`, `reports/`) | `69ded3b` (`demo-180m`) + commit `final-24h` | Có (cá nhân) |
+| **Dang Hoang Gia** (`IND-03065`) | `dieu-cay-15 <danggia2412@gmail.com>` | Config, Policy YAML `v1.0.0` & Metric Contract (`configs/`, `reports/metric_contract.md`) | `7ceb4e9` | Có |
+| **Dang Hoang Gia** (`IND-03065`) | `dieu-cay-15 <danggia2412@gmail.com>` | Baseline `consent_naive` & `all_hold` (`src/baseline.py`) | `18e653e` | Có |
+| **Dang Hoang Gia** (`IND-03065`) | `dieu-cay-15 <danggia2412@gmail.com>` | AST Policy Engine & 5-step Gate + HITL (`src/policy_engine.py`, `src/pipeline.py`) | `b0ba5c0` | Có |
+| **Dang Hoang Gia** (`IND-03065`) | `dieu-cay-15 <danggia2412@gmail.com>` | 7 Tests: Determinism, HITL, Provenance, `effective_date`, Dev Self-eval (`tests/test_pipeline.py`) | `b26389b` | Có |
+| **Dang Hoang Gia** (`IND-03065`) | `dieu-cay-15 <danggia2412@gmail.com>` | DPO Review Queue, Charts, Audit Evidence & Final Report (`demo/`, `reports/`) | `69ded3b` (`demo-180m`) + commit `final-24h` | Có |
 
 ---
 
