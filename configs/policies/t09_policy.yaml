@@ -1,0 +1,421 @@
+# ==============================================================================
+# Multi-Market Privacy Decision Gate Policy (T09) — Teaching / PoC Ruleset
+# Disclaimer: Academic exercise only — NOT legal advice. Every production
+# gate decision requires final sign-off by DPO / Legal Counsel.
+# ==============================================================================
+policy_version: "1.0.0"
+effective_date: "2026-01-01"
+default_as_of_date: "2026-11-14"
+precedence: ["HOLD", "REWORK", "GO"]
+
+known_markets: ["VN", "EU", "US-CA", "SG", "IN"]
+
+reason_codes:
+  - XBORDER_NO_MECHANISM
+  - XBORDER_NO_IMPACT_ASSESSMENT
+  - RETENTION_UNBOUNDED
+  - RETENTION_EXCESSIVE
+  - RAW_PII_IN_CLOUD
+  - DPIA_MISSING
+  - NOTICE_MISSING
+  - NO_LAWFUL_BASIS
+  - CONSENT_RECORD_MISSING
+  - CONSENT_INVALID
+  - MINORS
+  - NO_ENCRYPTION
+  - AMBIGUOUS_NEEDS_LEGAL
+
+rules:
+  # ------------------------------------------------------------------ Cross-border transfers
+  - id: R-XB-EU-01
+    markets: ["EU"]
+    effective_date: "2026-01-01"
+    when: "transfer.cross_border and transfer.mechanism in [null, 'unknown', 'none', '']"
+    decision: HOLD
+    reason_code: XBORDER_NO_MECHANISM
+    severity: 95
+    note: "EU cross-border transfer to non-adequate destination requires valid Chapter V mechanism (SCC/BCR/adequacy)."
+    source:
+      doc: "GDPR (Regulation (EU) 2016/679)"
+      ref: "Chapter V, Art. 44-49"
+      url: "https://eur-lex.europa.eu/eli/reg/2016/679/oj"
+    version_date: "2026-11-14"
+    confidence: high
+    needs_legal_review: false
+
+  - id: R-XB-SG-01
+    markets: ["SG"]
+    effective_date: "2026-01-01"
+    when: "transfer.cross_border and transfer.mechanism in [null, 'unknown', 'none', '']"
+    decision: HOLD
+    reason_code: XBORDER_NO_MECHANISM
+    severity: 90
+    note: "Singapore PDPA requires legally enforceable obligations / comparable protection for overseas transfers."
+    source:
+      doc: "Singapore PDPA 2012 (rev. 2020)"
+      ref: "Section 26 (Transfer Limitation Obligation)"
+      url: "https://sso.agc.gov.sg/Act/PDPA2012"
+    version_date: "2026-11-14"
+    confidence: medium
+    needs_legal_review: true
+
+  - id: R-VN-02
+    markets: ["VN"]
+    effective_date: "2026-01-01"
+    when: "transfer.cross_border and not transfer.transfer_impact_assessment"
+    decision: HOLD
+    reason_code: XBORDER_NO_IMPACT_ASSESSMENT
+    severity: 95
+    note: "Vietnam cross-border transfer requires an outbound transfer impact-assessment dossier."
+    source:
+      doc: "Luat BVDLCN 91/2025/QH15 + Nghi dinh 356/2025/ND-CP"
+      ref: "Luat 91 D.21; ND 356 dossier filing rules"
+      url: "https://thuvienphapluat.vn/van-ban/Bo-may-hanh-chinh/Luat-Bao-ve-du-lieu-ca-nhan-2025-so-91-2025-QH15-625628.aspx"
+    version_date: "2026-11-14"
+    confidence: medium
+    needs_legal_review: true
+
+  - id: R-VN-02B
+    markets: ["VN"]
+    effective_date: "2026-01-01"
+    when: "transfer.cross_border and transfer.mechanism in [null, 'unknown', 'none', '']"
+    decision: HOLD
+    reason_code: XBORDER_NO_MECHANISM
+    severity: 85
+    note: "Cross-border transfer mechanism/contractual safeguard is missing or unknown."
+    source:
+      doc: "Luat BVDLCN 91/2025/QH15 + Nghi dinh 356/2025/ND-CP"
+      ref: "Luat 91 D.21 (cross-border transfer safeguards)"
+      url: "https://thuvienphapluat.vn/van-ban/Bo-may-hanh-chinh/Luat-Bao-ve-du-lieu-ca-nhan-2025-so-91-2025-QH15-625628.aspx"
+    version_date: "2026-11-14"
+    confidence: medium
+    needs_legal_review: true
+
+  # ------------------------------------------------------------------ Lawful basis (jurisdiction-specific)
+  # Note: US-CA (CCPA/CPRA) does NOT use GDPR-style lawful_basis; intentionally omitted here.
+  - id: R-VN-01
+    markets: ["VN"]
+    effective_date: "2026-01-01"
+    when: "lawful_basis not in ['consent', 'contract', 'legal_obligation', 'vital_interest', 'public_task']"
+    decision: HOLD
+    reason_code: NO_LAWFUL_BASIS
+    severity: 95
+    note: "Vietnam has no legitimate-interest basis; processing requires consent or statutory exceptions."
+    source:
+      doc: "Luat BVDLCN 91/2025/QH15"
+      ref: "D.9 (consent), D.19 (cases not requiring consent)"
+      url: "https://thuvienphapluat.vn/van-ban/Bo-may-hanh-chinh/Luat-Bao-ve-du-lieu-ca-nhan-2025-so-91-2025-QH15-625628.aspx"
+    version_date: "2026-11-14"
+    confidence: medium
+    needs_legal_review: true
+
+  - id: R-EU-01
+    markets: ["EU"]
+    effective_date: "2026-01-01"
+    when: "lawful_basis not in ['consent', 'contract', 'legal_obligation', 'vital_interest', 'public_task', 'legitimate_interest']"
+    decision: HOLD
+    reason_code: NO_LAWFUL_BASIS
+    severity: 95
+    note: "EU GDPR requires a valid Art. 6(1) lawful basis."
+    source:
+      doc: "GDPR (Regulation (EU) 2016/679)"
+      ref: "Art. 6(1)"
+      url: "https://eur-lex.europa.eu/eli/reg/2016/679/oj"
+    version_date: "2026-11-14"
+    confidence: high
+    needs_legal_review: false
+
+  - id: R-EU-01B
+    markets: ["EU"]
+    effective_date: "2026-01-01"
+    when: "lawful_basis == 'legitimate_interest' and li_assessment_done is false"
+    decision: HOLD
+    reason_code: NO_LAWFUL_BASIS
+    severity: 85
+    note: "Legitimate interest claimed under GDPR Art. 6(1)(f) without completing a Legitimate Interests Assessment (LIA)."
+    source:
+      doc: "GDPR + EDPB Guidelines 01/2020 (Connected Vehicles)"
+      ref: "Art. 6(1)(f)"
+      url: "https://eur-lex.europa.eu/eli/reg/2016/679/oj"
+    version_date: "2026-11-14"
+    confidence: high
+    needs_legal_review: false
+
+  - id: R-SG-01
+    markets: ["SG"]
+    effective_date: "2026-01-01"
+    when: "lawful_basis not in ['consent', 'contract', 'legal_obligation', 'vital_interest', 'public_task', 'legitimate_interest', 'deemed_consent']"
+    decision: HOLD
+    reason_code: NO_LAWFUL_BASIS
+    severity: 95
+    note: "Singapore PDPA requires valid consent, deemed consent, or First/Second Schedule exception."
+    source:
+      doc: "Singapore PDPA 2012 (rev. 2020)"
+      ref: "Part IV (s.13-17) & First/Second Schedules"
+      url: "https://sso.agc.gov.sg/Act/PDPA2012"
+    version_date: "2026-11-14"
+    confidence: medium
+    needs_legal_review: true
+
+  - id: R-SG-02
+    markets: ["SG"]
+    effective_date: "2026-01-01"
+    when: "lawful_basis == 'legitimate_interest' and li_assessment_done is not true"
+    decision: HOLD
+    reason_code: NO_LAWFUL_BASIS
+    severity: 90
+    note: "Singapore PDPA Legitimate Interests Exception requires documented LIA before relying on it."
+    source:
+      doc: "Singapore PDPA 2012 (rev. 2020)"
+      ref: "First Schedule, Part 3, para 1(2)"
+      url: "https://sso.agc.gov.sg/Act/PDPA2012"
+    version_date: "2026-11-14"
+    confidence: medium
+    needs_legal_review: true
+
+  # ------------------------------------------------------------------ Consent validity & records
+  - id: R-CON-01
+    markets: ["*"]
+    effective_date: "2026-01-01"
+    when: "lawful_basis == 'consent' and not consent.obtained"
+    decision: HOLD
+    reason_code: CONSENT_INVALID
+    severity: 90
+    note: "Processing relies on consent as lawful basis, but consent has not been obtained."
+    source:
+      doc: "GDPR / Luat 91/2025 / SG PDPA"
+      ref: "GDPR Art. 4(11), Art. 7; Luat 91 D.9"
+      url: "https://eur-lex.europa.eu/eli/reg/2016/679/oj"
+    version_date: "2026-11-14"
+    confidence: high
+    needs_legal_review: false
+
+  - id: R-CON-02
+    markets: ["*"]
+    effective_date: "2026-01-01"
+    when: "lawful_basis == 'consent' and consent.obtained and (not consent.granular or not consent.withdrawable)"
+    decision: REWORK
+    reason_code: CONSENT_INVALID
+    severity: 65
+    note: "Bundled, non-granular, or non-withdrawable consent is invalid."
+    source:
+      doc: "Luat BVDLCN 91/2025/QH15 + GDPR"
+      ref: "Luat 91 D.9-10; GDPR Art. 7(3)"
+      url: "https://eur-lex.europa.eu/eli/reg/2016/679/oj"
+    version_date: "2026-11-14"
+    confidence: high
+    needs_legal_review: false
+
+  - id: R-CON-03
+    markets: ["*"]
+    effective_date: "2026-01-01"
+    when: "lawful_basis == 'consent' and consent.obtained and not consent.record_available"
+    decision: REWORK
+    reason_code: CONSENT_RECORD_MISSING
+    severity: 60
+    note: "Controller must retain verifiable audit proof of obtained consent."
+    source:
+      doc: "GDPR + Luat BVDLCN 91/2025/QH15"
+      ref: "GDPR Art. 7(1); Luat 91 D.9"
+      url: "https://eur-lex.europa.eu/eli/reg/2016/679/oj"
+    version_date: "2026-11-14"
+    confidence: high
+    needs_legal_review: false
+
+  # ------------------------------------------------------------------ Notice & Transparency
+  - id: R-NOT-01
+    markets: ["*"]
+    effective_date: "2026-01-01"
+    when: "not notice_given"
+    decision: REWORK
+    reason_code: NOTICE_MISSING
+    severity: 60
+    note: "Privacy notice / notice at collection is missing for data subjects."
+    source:
+      doc: "CCPA/CPRA + GDPR + Luat 91/2025 + SG PDPA"
+      ref: "CCPA 1798.100; GDPR Art. 12-14; Luat 91 D.13; PDPA s.20"
+      url: "https://oag.ca.gov/privacy/ccpa"
+    version_date: "2026-11-14"
+    confidence: high
+    needs_legal_review: false
+
+  # ------------------------------------------------------------------ Storage, Encryption & Minimization
+  - id: R-STO-01
+    markets: ["*"]
+    effective_date: "2026-01-01"
+    when: "storage.raw_retained and storage.location == 'cloud' and anonymization in [null, 'none', '']"
+    decision: HOLD
+    reason_code: RAW_PII_IN_CLOUD
+    severity: 92
+    note: "Unredacted raw PII (e.g. faces/plates/video) retained in cloud storage violates data minimization."
+    source:
+      doc: "GDPR + EDPB Guidelines 01/2020 & 02/2026 + Luat 91/2025"
+      ref: "GDPR Art. 5(1)(c), Art. 25; Luat 91 D.4"
+      url: "https://eur-lex.europa.eu/eli/reg/2016/679/oj"
+    version_date: "2026-11-14"
+    confidence: high
+    needs_legal_review: false
+
+  - id: R-STO-02
+    markets: ["*"]
+    effective_date: "2026-01-01"
+    when: "not storage.encryption_at_rest"
+    decision: REWORK
+    reason_code: NO_ENCRYPTION
+    severity: 65
+    note: "Storage lacks encryption at rest."
+    source:
+      doc: "GDPR + Nghi dinh 356/2025/ND-CP + SG PDPA"
+      ref: "GDPR Art. 32; PDPA s.24"
+      url: "https://eur-lex.europa.eu/eli/reg/2016/679/oj"
+    version_date: "2026-11-14"
+    confidence: high
+    needs_legal_review: false
+
+  # ------------------------------------------------------------------ Retention
+  - id: R-RET-01
+    markets: ["*"]
+    effective_date: "2026-01-01"
+    when: "retention_days is null"
+    decision: REWORK
+    reason_code: RETENTION_UNBOUNDED
+    severity: 60
+    note: "No retention limit defined (unbounded storage duration)."
+    source:
+      doc: "GDPR + Luat 91/2025 + SG PDPA"
+      ref: "GDPR Art. 5(1)(e); Luat 91 D.14; PDPA s.25"
+      url: "https://eur-lex.europa.eu/eli/reg/2016/679/oj"
+    version_date: "2026-11-14"
+    confidence: high
+    needs_legal_review: false
+
+  - id: R-RET-02
+    markets: ["*"]
+    effective_date: "2026-01-01"
+    when: "retention_days is not null and ((retention_days > 365 and (storage.raw_retained or anonymization in [null, 'none', ''])) or retention_days > 730)"
+    decision: REWORK
+    reason_code: RETENTION_EXCESSIVE
+    severity: 55
+    note: "Retention duration exceeds proportional threshold (>365d raw/unredacted or >730d general)."
+    source:
+      doc: "GDPR + CCPA/CPRA"
+      ref: "GDPR Art. 5(1)(e); CCPA 1798.100(a)(3)"
+      url: "https://eur-lex.europa.eu/eli/reg/2016/679/oj"
+    version_date: "2026-11-14"
+    confidence: medium
+    needs_legal_review: true
+
+  # ------------------------------------------------------------------ DPIA (Vietnam & high-risk EU)
+  - id: R-VN-03
+    markets: ["VN"]
+    effective_date: "2026-01-01"
+    when: "not dpia_done"
+    decision: HOLD
+    reason_code: DPIA_MISSING
+    severity: 90
+    note: "Vietnam requires a personal data processing impact assessment dossier (filed within 60 days)."
+    source:
+      doc: "Luat BVDLCN 91/2025/QH15 + Nghi dinh 356/2025/ND-CP"
+      ref: "Luat 91 D.20, D.22"
+      url: "https://thuvienphapluat.vn/van-ban/Bo-may-hanh-chinh/Luat-Bao-ve-du-lieu-ca-nhan-2025-so-91-2025-QH15-625628.aspx"
+    version_date: "2026-11-14"
+    confidence: medium
+    needs_legal_review: true
+
+  - id: R-EU-02
+    markets: ["EU"]
+    effective_date: "2026-01-01"
+    when: "not dpia_done and (storage.raw_retained or minors_possible or 'face' in data_types or 'in_cabin_video' in data_types or 'exterior_video' in data_types or 'biometric' in data_types)"
+    decision: HOLD
+    reason_code: DPIA_MISSING
+    severity: 90
+    note: "GDPR Art. 35 DPIA required for systematic public/in-cabin video monitoring or biometric/vulnerable subjects."
+    source:
+      doc: "GDPR + EDPB Guidelines 01/2020 (Connected Vehicles)"
+      ref: "GDPR Art. 35(3)(b)-(c)"
+      url: "https://eur-lex.europa.eu/eli/reg/2016/679/oj"
+    version_date: "2026-11-14"
+    confidence: high
+    needs_legal_review: false
+
+  # ------------------------------------------------------------------ Minors & Ambiguity Escalation
+  - id: R-MIN-01
+    markets: ["*"]
+    effective_date: "2026-01-01"
+    when: "minors_possible is true"
+    decision: HOLD
+    reason_code: MINORS
+    severity: 95
+    note: "Potential capture of minors requires heightened safeguards, parental consent verification, or strict edge exclusion."
+    source:
+      doc: "GDPR + CCPA/CPRA + Luat 91/2025"
+      ref: "GDPR Art. 8; CCPA 1798.120(c); Luat 91 D.24"
+      url: "https://eur-lex.europa.eu/eli/reg/2016/679/oj"
+    version_date: "2026-11-14"
+    confidence: high
+    needs_legal_review: true
+
+  - id: R-AMB-01
+    markets: ["*"]
+    effective_date: "2026-01-01"
+    when: "ambiguity_notes not in [null, '']"
+    decision: HOLD
+    reason_code: AMBIGUOUS_NEEDS_LEGAL
+    severity: 100
+    note: "Open legal/contractual ambiguity must be escalated to DPO/Legal before release."
+    source:
+      doc: "Internal Privacy Gate Standard"
+      ref: "Ambiguity Escalation Protocol"
+      url: "https://eur-lex.europa.eu/eli/reg/2016/679/oj"
+    version_date: "2026-11-14"
+    confidence: high
+    needs_legal_review: true
+
+  # ------------------------------------------------------------------ Upcoming / Future-effective rules (advisory only when effective_date > as_of_date)
+  - id: R-IN-DPDP-2027
+    markets: ["IN"]
+    effective_date: "2027-05-13"
+    when: "lawful_basis not in ['consent', 'certain_legitimate_uses']"
+    decision: HOLD
+    reason_code: NO_LAWFUL_BASIS
+    severity: 80
+    note: "Future obligation (effective 2027-05-13): India DPDP core processing grounds require consent or specified legitimate uses."
+    source:
+      doc: "India DPDP Act 2023 & DPDP Rules 2025"
+      ref: "Core obligations effective 13/05/2027"
+      url: "https://www.meity.gov.in/"
+    version_date: "2026-11-14"
+    confidence: medium
+    needs_legal_review: true
+
+  - id: R-EU-AIACT-2027
+    markets: ["EU"]
+    effective_date: "2027-12-02"
+    when: "'in_cabin_video' in data_types or 'biometric' in data_types"
+    decision: REWORK
+    reason_code: DPIA_MISSING
+    severity: 40
+    note: "Future obligation (effective 2027-12-02): EU AI Act Annex III high-risk governance & FRIA readiness."
+    source:
+      doc: "Regulation (EU) 2026/1744 amending EU AI Act"
+      ref: "Annex III high-risk systems (from 02/12/2027)"
+      url: "https://eur-lex.europa.eu/"
+    version_date: "2026-11-14"
+    confidence: medium
+    needs_legal_review: true
+
+  - id: R-EU-AIACT-2028
+    markets: ["EU"]
+    effective_date: "2028-08-02"
+    when: "'exterior_video' in data_types and purpose == 'ADAS model training'"
+    decision: REWORK
+    reason_code: DPIA_MISSING
+    severity: 40
+    note: "Future obligation (effective 2028-08-02): EU AI Act Annex I safety component data governance readiness."
+    source:
+      doc: "Regulation (EU) 2026/1744 amending EU AI Act"
+      ref: "Annex I safety components (from 02/08/2028)"
+      url: "https://eur-lex.europa.eu/"
+    version_date: "2026-11-14"
+    confidence: medium
+    needs_legal_review: true
